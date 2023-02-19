@@ -4,6 +4,7 @@
     <string name="baarbaanet">باربانت</string>
     <string name="driver">راننده</string>
     <string name="network_error">خطای شبکه</string>
+    <string name="choose_folder">انتخاب کنید</string>
     <string name="network_error_body">اتصال اینترنت خود را بررسی کنید یا با پشتیبانی تماس بگیرید</string>
     <string name="service_error">سرور در دسترس نیست</string>
     <string name="service_error_body">با پشتیبانی تماس بگیرید</string>

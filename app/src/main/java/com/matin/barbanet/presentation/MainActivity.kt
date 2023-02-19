@@ -8,10 +8,16 @@ import android.content.Intent
 import android.content.SharedPreferences.Editor
 import android.content.pm.PackageManager
 import android.location.LocationManager
+import android.net.Uri
 import android.os.Build
 import android.os.Bundle
+import android.os.Environment
+import android.provider.MediaStore
 import android.provider.Settings
+import android.util.Log
 import android.view.ViewGroup
+import android.webkit.ValueCallback
+import android.webkit.WebChromeClient
 import android.webkit.WebView
 import android.webkit.WebViewClient
 import android.widget.Toast
@@ -24,6 +30,7 @@ import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.viewinterop.AndroidView
 import androidx.core.app.ActivityCompat
 import androidx.core.content.ContextCompat
+import androidx.core.content.FileProvider
 import androidx.preference.PreferenceManager
 import com.google.android.gms.common.api.ResolvableApiException
 import com.google.firebase.messaging.FirebaseMessaging
@@ -40,6 +47,10 @@ import com.matin.barbanet.utiles.isNetworkAvailable
 import com.matin.common.ui.showPermissionDialog
 import com.matin.common.utiles.CommonSharedPref
 import dagger.hilt.android.AndroidEntryPoint
+import java.io.File
+import java.io.IOException
+import java.text.SimpleDateFormat
+import java.util.*
 
 @AndroidEntryPoint
 class MainActivity : ComponentActivity() {
@@ -47,6 +58,11 @@ class MainActivity : ComponentActivity() {
     private lateinit var prefEditor: Editor
     private lateinit var userSharedPref: CommonSharedPref
     private val backgroundLocationPermissionRequestCode = 1002
+    val fileChooserRequestCode = 1000
+    var filePathCallback: ValueCallback<Array<Uri>>? = null
+    var cameraPhotoPath: String? = null
+    val requestCheckSettings = 5000
+
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
 
@@ -98,7 +114,8 @@ class MainActivity : ComponentActivity() {
                         WebViewPage(
                             url = webUrl.webView?.url!! + Constants.WEB_VIEW_ATTACHMENT,
                             this@MainActivity,
-                            viewModel
+                            viewModel,
+                            cameraPhotoPath
                         )
                     }
                     if (!appFeature.isLoading) {
@@ -165,6 +182,7 @@ class MainActivity : ComponentActivity() {
     private fun initFirebase() {
         subscribeToFirebaseTopic("general")
     }
+
     private fun checkLocationEnabledDialog() {
         val locationManager =
             this.getSystemService(Context.LOCATION_SERVICE) as LocationManager
@@ -176,6 +194,7 @@ class MainActivity : ComponentActivity() {
             askEnableLocation()
         }
     }
+
     private fun askEnableLocation() {
         val alertDialog = AlertDialog.Builder(this@MainActivity)
         alertDialog.setTitle("اخطار")
@@ -188,8 +207,47 @@ class MainActivity : ComponentActivity() {
         }
         alertDialog.setNegativeButton(
             "نه خیر"
-        ) { dialog, which ->  }
+        ) { dialog, which -> }
         alertDialog.show()
+    }
+
+    @Suppress("DEPRECATION")
+    @Deprecated("Deprecated in Java")
+    override fun onActivityResult(requestCode: Int, resultCode: Int, data: Intent?) {
+        super.onActivityResult(requestCode, resultCode, data)
+
+        when (requestCode) {
+            fileChooserRequestCode -> {
+                if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.LOLLIPOP && filePathCallback != null) {
+                    var results: Array<Uri>? = null
+
+                    // check that the response is a good one
+                    if (resultCode == RESULT_OK) {
+                        if (data == null || data.data == null) {
+                            // if there is not data, then we may have taken a photo
+                            if (cameraPhotoPath != null) {
+                                results = arrayOf(Uri.parse(cameraPhotoPath))
+                            }
+                        } else {
+                            val dataString = data.dataString
+                            if (dataString != null) {
+                                results = arrayOf(Uri.parse(dataString))
+                            }
+                        }
+                    }
+                    filePathCallback?.onReceiveValue(results)
+                    filePathCallback = null
+                }
+            }
+//            requestCheckSettings -> {
+//                if (resultCode == RESULT_OK) {
+//                    if (locationServiceIntent != null)
+//                        startService(locationServiceIntent)
+//                } else {
+//                    Log.d(tag, "requestCheckSettings denied")
+//                }
+//            }
+        }
     }
 }
 
@@ -198,8 +256,13 @@ class MainActivity : ComponentActivity() {
 fun WebViewPage(
     url: String,
     context: MainActivity,
-    viewModel: DriverViewModel
+    viewModel: DriverViewModel,
+    cameraPhotoPathIn : String?,
+
 ) {
+    var cameraPhotoPath = cameraPhotoPathIn
+    val tag = "MainActivity"
+    val fileChooserRequestCode = 1000
     AndroidView(factory = {
         WebView(it).apply {
             layoutParams = ViewGroup.LayoutParams(
@@ -220,7 +283,81 @@ fun WebViewPage(
                     // cancel loading
                 }
             }
+            webChromeClient = object : WebChromeClient() {
 
+                @SuppressLint("QueryPermissionsNeeded")
+                override fun onShowFileChooser(
+                    webView: WebView?, filePathCallback: ValueCallback<Array<Uri>>,
+                    fileChooserParams: FileChooserParams?
+                ): Boolean {
+                    context.filePathCallback?.onReceiveValue(null)
+                    context.filePathCallback = filePathCallback
+                    var takePictureIntent: Intent? = Intent(MediaStore.ACTION_IMAGE_CAPTURE)
+                    if (takePictureIntent!!.resolveActivity(context.packageManager) != null) {
+
+                        // create the file where the photo should go
+                        var photoFile: File? = null
+                        try {
+                            photoFile = createImageFile()
+                            val putExtra = takePictureIntent.putExtra("PhotoPath", cameraPhotoPath)
+                        } catch (ex: IOException) {
+                            // Error occurred while creating the File
+                            Log.d(tag, "Unable to create Image File", ex)
+                        }
+
+                        // continue only if the file was successfully created
+                        if (photoFile != null) {
+                            cameraPhotoPath = "file:" + photoFile.absolutePath
+                            val photoURI: Uri = FileProvider.getUriForFile(
+                                context,
+                                BuildConfig.APPLICATION_ID + Constants.FILE_PROVIDER_SUFFIX,
+                                photoFile
+                            )
+                            takePictureIntent.putExtra(MediaStore.EXTRA_OUTPUT, photoURI)
+                        } else {
+                            takePictureIntent = null
+                        }
+                    }
+
+                    val contentSelectionIntent = Intent(Intent.ACTION_GET_CONTENT)
+                    contentSelectionIntent.addCategory(Intent.CATEGORY_OPENABLE)
+                    contentSelectionIntent.type = "image/*"
+                    val intentArray: Array<Intent?> =
+                        takePictureIntent?.let { arrayOf(it) } ?: arrayOfNulls(0)
+                    val chooserIntent = Intent(Intent.ACTION_CHOOSER)
+                    chooserIntent.putExtra(Intent.EXTRA_INTENT, contentSelectionIntent)
+                    chooserIntent.putExtra(
+                        Intent.EXTRA_TITLE,
+                        context.getString(R.string.choose_folder)
+                    )
+                    chooserIntent.putExtra(Intent.EXTRA_INITIAL_INTENTS, intentArray)
+                    context.startActivityForResult(chooserIntent, fileChooserRequestCode)
+                    return true
+                }
+
+                private fun createImageFile(): File? {
+                    return try {
+                        // Create an image file name
+                        val datePattern = "yyyy-MM-dd_HH-mm-ss"
+                        val timeStamp: String =
+                            SimpleDateFormat(datePattern, Locale.US).format(Date())
+                        val storageDir: File? =
+                            context.getExternalFilesDir(Environment.DIRECTORY_PICTURES)
+                        File.createTempFile(
+                            "Baarbaanet_image_JPEG_at_${timeStamp}_", /* prefix */
+                            ".jpg",
+                            storageDir
+                        )
+                    } catch (ex: IOException) {
+                        // Error occurred while creating the File
+                        ex.printStackTrace()
+                        Log.e(tag, "captureFromCamera: ${ex.message}", ex)
+                        null
+                    }
+
+                }
+
+            }
             loadUrl(url)
         }
     }, update = {
