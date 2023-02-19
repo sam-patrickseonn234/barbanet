@@ -1,0 +1,11 @@
+<?xml version="1.0" encoding="utf-8"?>
+<network-security-config>
+    <domain-config cleartextTrafficPermitted="true">
+        <domain includeSubdomains="true">baarbaanet.com</domain>
+        <domain includeSubdomains="true">192.168.7.175</domain>
+        <domain includeSubdomains="true">192.168.77.69</domain>
+        <domain includeSubdomains="true">192.168.77.90</domain>
+        <domain includeSubdomains="true">192.168.77.165</domain>
+        <domain includeSubdomains="true">192.168.77.167</domain>
+    </domain-config>
+</network-security-config>

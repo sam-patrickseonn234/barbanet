@@ -1,0 +1,32 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <color name="colorPrimary">#00a88e</color>
+    <color name="colorPrimaryDark">#007861</color>
+    <color name="colorPrimaryLight">#56dabe</color>
+    <color name="colorAccent">#e6b245</color>
+    <color name="colorIcon">#d4e1ea</color>
+    <color name="colorTextPrimary">#505e70</color>
+    <color name="colorTextLight">#979797</color>
+    <color name="colorBackStatBlack">#5d6174</color>
+    <color name="colorTextSecondary">#ffffff</color>
+    <color name="colorHint">#80D4C7</color>
+    <color name="black_overlay">#66000000</color>
+    <color name="black_matriyal">#252525</color>
+    <color name="colorItemText">#525e5c</color>
+    <color name="black_txt">#3F3F3F</color>
+    <color name="black_txt_2">#605F5F</color>
+
+
+
+    <color name="colorAccentDark">#92b118</color>
+    <color name="colorAccentLight">#92b118</color>
+
+    <color name="black">#FF000000</color>
+    <color name="white">#FFFFFFFF</color>
+
+    <color name="app_text">#333</color>
+    <color name="app_text_muted">#555</color>
+
+    <color name="transparent">#00000000</color>
+    <color name="ic_launcher_background">#FFFFFF</color>
+</resources>

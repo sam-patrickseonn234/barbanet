@@ -1,0 +1,16 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <declare-styleable name="NumberedTextList">
+        <attr name="android:text" format="string"/>
+        <attr name="android:textColor"/>
+        <attr name="android:textSize"/>
+        <attr name="indicatorType" format="enum">
+            <enum name="number" value="0"/>
+            <enum name="bullet" value="1"/>
+        </attr>
+        <attr name="indiColor" format="reference"/>
+        <attr name="indicatorSeparator" format="string"/>
+        <attr name="textMargin" format="dimension"/>
+        <attr name="itemMargin" format="dimension"/>
+    </declare-styleable>
+</resources>

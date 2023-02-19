@@ -1,0 +1,20 @@
+<resources>
+    <string name="app_name">Barbanet Driver</string>
+    <string name="title_activity_main">MainActivity</string>
+    <string name="baarbaanet">باربانت</string>
+    <string name="driver">راننده</string>
+    <string name="network_error">خطای شبکه</string>
+    <string name="network_error_body">اتصال اینترنت خود را بررسی کنید یا با پشتیبانی تماس بگیرید</string>
+    <string name="service_error">سرور در دسترس نیست</string>
+    <string name="service_error_body">با پشتیبانی تماس بگیرید</string>
+    <string name="choose_map_provider">یک مسیریاب انتخاب کنید</string>
+    <string name="choose_browser">یک مرورگر انتخاب کنید</string>
+    <string name="loading">"درحال بارگذاری"</string>
+    <string name="please_wait">"لطفا کمی صبر کنید"</string>
+    <string name="background_location_permission">دسترسی به موقعیت مکانی در پس زمینه</string>
+    <string name="default_notification_channel_id">barbaanetMain</string>
+    <string name="message_subscribed">Subscribed to notification service</string>
+    <string name="message_subscribe_failed">notification subscription failed</string>
+    <string name="alert_background_permission_dialog">برای دسترسی به موقعیت مکانی در پس زمینه لطفا گزینه %s را در صفحه ی بعدی انتخاب کرده و به اپلیکیشن بازگردید</string>
+    <string name="simple_alert_backgrounf_permission_dialog">برای دسترسی به موقعیت مکانی در پس زمینه لطفا گزینه "Allow all the time یا همیشه مجاز بودن" را در صفحه ی بعدی انتخاب کرده و به اپلیکیشن بازگردید</string>
+</resources>

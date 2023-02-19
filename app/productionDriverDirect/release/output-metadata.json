@@ -1,0 +1,20 @@
+{
+  "version": 3,
+  "artifactType": {
+    "type": "APK",
+    "kind": "Directory"
+  },
+  "applicationId": "com.matin.barbanet.driver",
+  "variantName": "productionDriverDirectRelease",
+  "elements": [
+    {
+      "type": "SINGLE",
+      "filters": [],
+      "attributes": [],
+      "versionCode": 53,
+      "versionName": "4.1.0",
+      "outputFile": "app-production-driver-direct-release.apk"
+    }
+  ],
+  "elementType": "File"
+}
